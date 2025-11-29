@@ -411,9 +411,9 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     # الحصول على التوكن من متغيرات البيئة أو مباشرة
-    TOKEN = os.getenv("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+    TOKEN = os.getenv("BOT_TOKEN", "8430539370:AAH1u6Z1b_V-6t7pQjBEsBvwHu4lcjY6Yv0")
     
-    if TOKEN == "YOUR_BOT_TOKEN_HERE":
+    if TOKEN == "8430539370:AAH1u6Z1b_V-6t7pQjBEsBvwHu4lcjY6Yv0":
         logger.error("Please set BOT_TOKEN environment variable!")
         return
     
