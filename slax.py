@@ -410,12 +410,8 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.error(f"Exception while handling an update: {context.error}")
 
 def main():
-    # الحصول على التوكن من متغيرات البيئة أو مباشرة
-    TOKEN = os.getenv("BOT_TOKEN", "8430539370:AAH1u6Z1b_V-6t7pQjBEsBvwHu4lcjY6Yv0")
-    
-    if TOKEN == "8430539370:AAH1u6Z1b_V-6t7pQjBEsBvwHu4lcjY6Yv0":
-        logger.error("Please set BOT_TOKEN environment variable!")
-        return
+    # توكن البوت
+    TOKEN = "8430539370:AAH1u6Z1b_V-6t7pQjBEsBvwHu4lcjY6Yv0"
     
     # إنشاء التطبيق
     application = Application.builder().token(TOKEN).build()
