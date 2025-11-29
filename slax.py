@@ -214,7 +214,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "انتهت صلاحية الأداة.\n"
             "للتجديد، تواصل مع:\n"
             "Instagram: @g2z.9\n"
-            "Telegram: aazzaarrdd"
+            "Telegram: @aazzaarrdd"
         )
         return ConversationHandler.END
     
@@ -224,28 +224,45 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "      مرحباً بك في بوت Instagram Report\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n\n"
         "المطور: azard & slax\n"
-        "Telegram: aazzaarrdd\n"
+        "Telegram: @aazzaarrdd\n"
         "Instagram: @g2z.9\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         "      ماذا يمكن لهذا البوت فعله؟\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n\n"
         "هذا البوت يساعدك في:\n\n"
         "1. إرسال بلاغات متعددة لحسابات Instagram\n"
-        "2. يدعم 15 نوع مختلف من البلاغات\n"
+        "2. يدعم 22 نوع من البلاغات\n"
         "3. يمكنك استخراج Session ID تلقائياً\n"
         "4. إرسال بلاغات مستمرة حتى الإيقاف\n"
         "5. متابعة عدد البلاغات المرسلة\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         "      أنواع البلاغات المتاحة:\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "- Spam (سبام)\n"
-        "- Self Injury (إيذاء النفس)\n"
-        "- Sale (بيع غير قانوني)\n"
-        "- Nudity (محتوى إباحي)\n"
-        "- Violence (عنف)\n"
-        "- Hate Speech (خطاب كراهية)\n"
-        "- Harassment (مضايقة)\n"
-        "- Copyright (حقوق نشر)\n"
+        "1 - Spam (سبام)\n"
+        "2 - Self Injury (إيذاء النفس و إنتحار)\n"
+        "3 - Sale (بيع مخدرات)\n"
+        "4 - Nudity (محتوى إباحي)\n"
+        "5 - Violence (عنف ومنظمات خطرة)\n"
+        "6 - Hate  (خطاب كراهية)\n"
+        "7 - Harassment (مضايقة)\n"
+        "8 - instagram (انتحال إنستا)\n"
+        "9 - instagram business (إنتحال إنستا الاعمال)\n"
+        "10- Copyright (إنتحال قسم دعم كوبيرايت)\n"
+        "11 - Nudity kids (قاصر)\n"
+        "12 - arms sale (بيع أسلحة)\n"
+        "13 - violence (عنف عشوائي)\n"
+        "14 - violence (عنف عشوائي)\n"
+        "15 - violence (عنف عشوائي)\n"
+        "16 - sale illegal (بيع غير قانوني~مختلف عن المخدرات)\n"
+        "17 - violence (عشوائي)\n"
+        "18 - violence (عشوائي)\n"
+        "19 - violence (عشوائي)\n"
+        "20- violence (افراد خطرون ومنظمات خطرة~مختلف عن رقم 5)\n"
+        "21 - violence (عشوائي)\n"
+        "22 - data & people (تداخل بيانات الناخبين او تعداد السكان)\n"
+        
+        
+        "- \n"
         "- وغيرها...\n\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         "      الأوامر المتاحة:\n"
@@ -362,12 +379,18 @@ async def target_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [
             ['1 - Spam', '2 - Self'],
             ['3 - Sale', '4 - Nudity'],
-            ['5 - Violence', '6 - Hate'],
+            ['5 - Violence+dangerous organization', '6 - Hate'],
             ['7 - Harassment', '8 - Instagram'],
             ['9 - Instagram Business', '10 - Copyright'],
-            ['11 - Impression 3 Business', '12 - Impression 3 Instagram'],
-            ['13 - Impression 4 Business', '14 - Impression 4 Instagram'],
-            ['15 - Violence 1']
+            ['11 - kids(-18)', '12 - sale arms'],
+            ['13 - (?)', '14 - violence'],
+            ['15 - Violence 1' , '16 - sale illegal '],
+            ['17 - violence' , '18 - violence'],
+            ['19 - violence' , '20 - dangerous people+dangerous organization'],
+            ['21 - None','22 - data & people'],
+
+            
+            
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
         
@@ -385,13 +408,103 @@ async def target_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return ConversationHandler.END
 
+# متغير عام لتخزين المهمة الحالية
+active_tasks = {}
+
+async def reporting_task(update: Update, context: ContextTypes.DEFAULT_TYPE, target_id, target, sessionid, csrftoken, report_type):
+    """مهمة منفصلة لإرسال البلاغات"""
+    user_id = update.effective_user.id
+    count = 0
+    success_count = 0
+    fail_count = 0
+    start_time = datetime.now()
+    
+    try:
+        while user_id in active_tasks and active_tasks[user_id]:
+            success, message = send_report(target_id, sessionid, csrftoken, report_type)
+            count += 1
+            
+            if success:
+                success_count += 1
+                if count % 5 == 0:
+                    await context.bot.send_message(
+                        chat_id=update.effective_chat.id,
+                        text=f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                             f"      تحديث البلاغات\n"
+                             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                             f"تم إرسال: {success_count} بلاغ ناجح\n"
+                             f"فشل: {fail_count} بلاغ\n"
+                             f"المجموع: {count} محاولة\n\n"
+                             f"البلاغات مستمرة...\n"
+                             f"للإيقاف: /stop"
+                    )
+            else:
+                fail_count += 1
+                if "حظرك" in message or "429" in message:
+                    end_time = datetime.now()
+                    duration = end_time - start_time
+                    
+                    await context.bot.send_message(
+                        chat_id=update.effective_chat.id,
+                        text=f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                             f"      تقرير نهائي\n"
+                             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                             f"تم إيقاف البلاغات\n\n"
+                             f"السبب: {message}\n\n"
+                             f"الإحصائيات:\n"
+                             f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                             f"البلاغات الناجحة: {success_count}\n"
+                             f"البلاغات الفاشلة: {fail_count}\n"
+                             f"المجموع الكلي: {count}\n\n"
+                             f"الهدف: @{target}\n"
+                             f"نوع البلاغ: {report_type}\n"
+                             f"المدة: {duration.seconds} ثانية\n\n"
+                             f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                             f"/start للبدء من جديد"
+                    )
+                    break
+            
+            # تأخير بين كل بلاغ (2 ثانية) مع فحص الإيقاف كل 0.5 ثانية
+            for _ in range(4):
+                if user_id not in active_tasks or not active_tasks[user_id]:
+                    break
+                await asyncio.sleep(0.5)
+        
+        # إذا تم الإيقاف يدوياً
+        if user_id not in active_tasks or not active_tasks[user_id]:
+            end_time = datetime.now()
+            duration = end_time - start_time
+            
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                     f"      تقرير نهائي\n"
+                     f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                     f"تم إيقاف البلاغات يدوياً\n\n"
+                     f"الإحصائيات:\n"
+                     f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                     f"البلاغات الناجحة: {success_count}\n"
+                     f"البلاغات الفاشلة: {fail_count}\n"
+                     f"المجموع الكلي: {count}\n\n"
+                     f"الهدف: @{target}\n"
+                     f"نوع البلاغ: {report_type}\n"
+                     f"المدة: {duration.seconds} ثانية\n\n"
+                     f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                     f"/start للبدء من جديد"
+            )
+    except Exception as e:
+        logger.error(f"Error in reporting task: {e}")
+    finally:
+        if user_id in active_tasks:
+            del active_tasks[user_id]
+
 async def report_type_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
     choice = update.message.text
     
     try:
         report_type = int(choice.split('-')[0].strip())
-        if report_type < 1 or report_type > 15:
-            await update.message.reply_text("رقم غير صحيح! اختر من 1 إلى 15")
+        if report_type < 1 or report_type > 22:
+            await update.message.reply_text("رقم غير صحيح! اختر من 1 إلى 22")
             return REPORT_TYPE
     except:
         await update.message.reply_text("رقم غير صحيح! اختر من القائمة")
@@ -401,6 +514,7 @@ async def report_type_selection(update: Update, context: ContextTypes.DEFAULT_TY
     target = context.user_data['target']
     sessionid = context.user_data['sessionid']
     csrftoken = context.user_data['csrftoken']
+    user_id = update.effective_user.id
     
     await update.message.reply_text(
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -414,86 +528,17 @@ async def report_type_selection(update: Update, context: ContextTypes.DEFAULT_TY
         reply_markup=ReplyKeyboardRemove()
     )
     
-    context.user_data['reporting'] = True
-    context.user_data['report_type'] = report_type
-    context.user_data['start_time'] = datetime.now()
-    
-    count = 0
-    success_count = 0
-    fail_count = 0
-    
-    while context.user_data.get('reporting', False):
-        success, message = send_report(target_id, sessionid, csrftoken, report_type)
-        count += 1
-        
-        if success:
-            success_count += 1
-            if count % 5 == 0:
-                await update.message.reply_text(
-                    f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                    f"      تحديث البلاغات\n"
-                    f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                    f"تم إرسال: {success_count} بلاغ ناجح\n"
-                    f"فشل: {fail_count} بلاغ\n"
-                    f"المجموع: {count} محاولة\n\n"
-                    f"البلاغات مستمرة...\n"
-                    f"للإيقاف: /stop"
-                )
-        else:
-            fail_count += 1
-            if "حظرك" in message or "429" in message:
-                end_time = datetime.now()
-                duration = end_time - context.user_data['start_time']
-                
-                await update.message.reply_text(
-                    f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                    f"      تقرير نهائي\n"
-                    f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                    f"تم إيقاف البلاغات\n\n"
-                    f"السبب: {message}\n\n"
-                    f"الإحصائيات:\n"
-                    f"━━━━━━━━━━━━━━━━━━━━━━\n"
-                    f"البلاغات الناجحة: {success_count}\n"
-                    f"البلاغات الفاشلة: {fail_count}\n"
-                    f"المجموع الكلي: {count}\n\n"
-                    f"الهدف: @{target}\n"
-                    f"نوع البلاغ: {report_type}\n"
-                    f"المدة: {duration.seconds} ثانية\n\n"
-                    f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                    f"/start للبدء من جديد"
-                )
-                break
-        
-        # تأخير بين كل بلاغ (2 ثانية)
-        await asyncio.sleep(2)
-    
-    # إذا تم الإيقاف يدوياً
-    if not context.user_data.get('reporting', False) and count > 0:
-        end_time = datetime.now()
-        duration = end_time - context.user_data['start_time']
-        
-        await update.message.reply_text(
-            f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"      تقرير نهائي\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"تم إيقاف البلاغات يدوياً\n\n"
-            f"الإحصائيات:\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"البلاغات الناجحة: {success_count}\n"
-            f"البلاغات الفاشلة: {fail_count}\n"
-            f"المجموع الكلي: {count}\n\n"
-            f"الهدف: @{target}\n"
-            f"نوع البلاغ: {report_type}\n"
-            f"المدة: {duration.seconds} ثانية\n\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"/start للبدء من جديد"
-        )
+    # بدء مهمة البلاغات في الخلفية
+    active_tasks[user_id] = True
+    asyncio.create_task(reporting_task(update, context, target_id, target, sessionid, csrftoken, report_type))
     
     return ConversationHandler.END
 
 async def stop_reporting(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if context.user_data.get('reporting', False):
-        context.user_data['reporting'] = False
+    user_id = update.effective_user.id
+    
+    if user_id in active_tasks and active_tasks[user_id]:
+        active_tasks[user_id] = False
         await update.message.reply_text(
             "━━━━━━━━━━━━━━━━━━━━━━\n"
             "      تم الإيقاف\n"
@@ -506,7 +551,6 @@ async def stop_reporting(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "لا توجد عملية إبلاغ جارية حالياً.\n\n"
             "/start للبدء من جديد"
         )
-    return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
